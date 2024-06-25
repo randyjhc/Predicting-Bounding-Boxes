@@ -14,5 +14,18 @@ Next, we define the dense layers following the extractor.
 
 Lastly, we define a dense layer that outputs the bounding box predictions.
 
-![Model Graph](./results/01_model_graph.png)
+![Model-Graph](./results/01_model_graph.png)
 
+# Losses Trend
+
+The losses are measured by mean squared error (MSE).
+
+![Loss-Trend](./results/02_loss_trend.png)
+
+# Bounding Box Outputs
+
+The output bounding boxes (green) are presented along with the ground truth bounding boxes (red).
+
+We evaluate how well the model predicts the bounding box by calculating the Intersection-over-union (IoU) score for each image.
+
+![Bounding-Box](./results/03_bounding_box.png)
