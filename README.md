@@ -9,7 +9,10 @@ We will use transfer learning on one of the pre-trained models available in Kera
 # Model Graph
 
 We build a feature extractor using MobileNetV2.
+
 Next, we define the dense layers following the extractor.
+
 Lastly, we define a dense layer that outputs the bounding box predictions.
+
 ![Model Graph](./results/01_model_graph.png)
 
