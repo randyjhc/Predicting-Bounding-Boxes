@@ -24,7 +24,7 @@ The losses are measured by mean squared error (MSE).
 
 # Bounding Box Outputs
 
-The output bounding boxes (green) are presented along with the ground truth bounding boxes (red).
+The output bounding boxes (red) are presented along with the ground truth bounding boxes (green).
 
 We evaluate how well the model predicts the bounding box by calculating the Intersection-over-union (IoU) score for each image.
 
