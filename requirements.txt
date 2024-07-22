@@ -1,7 +1,8 @@
 gradio
-tf-keras
 tensorflow
+tensorflow-datasets
 pytest
 pytest-cov
 pylint
 black
+opencv-python-headless
