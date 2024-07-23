@@ -28,8 +28,8 @@ jobs:
       - name: Add remote
         env:
           HG: ${{ secrets.HG }}
-        run: git remote add space https://randyjhc:$HG@huggingface.co/spaces/randyjhc/randyjhc/Predicting-Bounding-Boxes
+        run: git remote add space https://randyjhc:$HG@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes
       - name: Push to hub
         env:
           HG: ${{ secrets.HG }}
-        run: git push --force https://randyjhc:$HG@huggingface.co/spaces/randyjhc/randyjhc/Predicting-Bounding-Boxes main
+        run: git push --force https://randyjhc:$HG@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes main
