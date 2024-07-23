@@ -1,8 +1,10 @@
 gradio
-tensorflow
+tensorflow==2.15.0
 tensorflow-datasets
 pytest
 pytest-cov
 pylint
 black
 opencv-python-headless
+wget
+gdown

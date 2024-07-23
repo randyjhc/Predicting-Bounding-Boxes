@@ -97,10 +97,10 @@ def config_plt():
         os.path.dirname(plt.__file__), "mpl-data/fonts/ttf"
     )
 
-'''
+
 # utility to display a row of digits with their predictions
 def display_digits_with_boxes(
-    images, pred_bboxes, bboxes, iou, title, bboxes_normalized=False
+    images, pred_bboxes, bboxes, iou, title, bboxes_normalized=False, iou_threshold=0.5
 ):
 
     n = len(images)
@@ -171,5 +171,3 @@ def plot_metrics(metric_name, title, ylim=5):
         history.history["val_" + metric_name], color="green", label="val_" + metric_name
     )
     plt.legend()
-'''
-    

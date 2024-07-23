@@ -1,4 +1,4 @@
-import os, re, time, json, zipfile
+import os, re, time, json, zipfile, wget
 
 # import PIL.Image, PIL.ImageFont, PIL.ImageDraw
 import numpy as np
@@ -16,6 +16,10 @@ from datetime import datetime
 # %load_ext tensorboard
 
 from lib.draw import *
+from lib.final_model import *
+import gdown
+
+BATCH_SIZE = 64
 
 
 def read_image_tfds(image, bbox):
@@ -115,7 +119,7 @@ def dataset_to_numpy_with_original_bboxes_util(dataset, batch_size=0, N=0):
     )
 
 
-def get_visualization_training_dataset():
+def get_visualization_training_dataset(data_dir):
     dataset, info = tfds.load(
         "caltech_birds2010",
         split="train",
@@ -130,7 +134,7 @@ def get_visualization_training_dataset():
     return visualization_training_dataset
 
 
-def get_visualization_validation_dataset():
+def get_visualization_validation_dataset(data_dir):
     dataset = tfds.load(
         "caltech_birds2010", split="test", data_dir=data_dir, download=False
     )
@@ -140,11 +144,28 @@ def get_visualization_validation_dataset():
     return visualization_validation_dataset
 
 
-def predict():
-    print("Start Predicting...")
-    """
+def get_training_dataset(dataset):
+    dataset = dataset.map(read_image_tfds, num_parallel_calls=16)
+    dataset = dataset.shuffle(512, reshuffle_each_iteration=True)
+    dataset = dataset.repeat()
+    dataset = dataset.batch(BATCH_SIZE)
+    dataset = dataset.prefetch(-1)
+    return dataset
+
+
+def get_validation_dataset(dataset):
+    dataset = dataset.map(read_image_tfds, num_parallel_calls=16)
+    dataset = dataset.batch(BATCH_SIZE)
+    dataset = dataset.repeat()
+    return dataset
+
+
+def train():
+    print("Start Preprocessing...")
     # Download the dataset
     # !wget https://storage.googleapis.com/tensorflow-3-public/datasets/caltech_birds2010_011.zip
+    # url = "https://storage.googleapis.com/tensorflow-3-public/datasets/caltech_birds2010_011.zip"
+    # wget.download(url)
 
     # Specify the data directory
     data_dir = "./data"
@@ -158,10 +179,10 @@ def predict():
     # Extract the dataset into the data directory
     with zipfile.ZipFile("./caltech_birds2010_011.zip") as zipref:
         zipref.extractall(data_dir)
-    
+
     config_plt()
 
-    visualization_training_dataset = get_visualization_training_dataset()
+    visualization_training_dataset = get_visualization_training_dataset(data_dir)
     (visualization_training_images, visualization_training_bboxes) = (
         dataset_to_numpy_util(visualization_training_dataset, N=10)
     )
@@ -173,7 +194,7 @@ def predict():
         "training images and their bboxes",
     )
 
-    visualization_validation_dataset = get_visualization_validation_dataset()
+    visualization_validation_dataset = get_visualization_validation_dataset(data_dir)
     (visualization_validation_images, visualization_validation_bboxes) = (
         dataset_to_numpy_util(visualization_validation_dataset, N=10)
     )
@@ -184,4 +205,167 @@ def predict():
         np.array([]),
         "validation images and their bboxes",
     )
+
     """
+    2.3 Load and prepare the datasets for the model
+    """
+    # BATCH_SIZE = 64
+    training_dataset = get_training_dataset(visualization_training_dataset)
+    validation_dataset = get_validation_dataset(visualization_validation_dataset)
+
+    """
+    3. Define the Network
+    """
+    # define your model
+    model = define_and_compile_model()
+    # print model layers
+    model.summary()
+
+    """
+    4. Train the Model
+    """
+    # You'll train 50 epochs
+    EPOCHS = 2
+
+    ### START CODE HERE ###
+
+    # Choose a batch size
+    BATCH_SIZE = 64
+
+    # Get the length of the training set
+    length_of_training_dataset = len(visualization_training_dataset)
+    print(length_of_training_dataset)
+
+    # Get the length of the validation set
+    length_of_validation_dataset = len(visualization_validation_dataset)
+    print(length_of_validation_dataset)
+
+    # Get the steps per epoch (may be a few lines of code)
+    steps_per_epoch = length_of_training_dataset // BATCH_SIZE
+    if length_of_training_dataset % BATCH_SIZE > 0:
+        steps_per_epoch += 1
+
+    # get the validation steps (per epoch) (may be a few lines of code)
+    validation_steps = length_of_validation_dataset // BATCH_SIZE
+    if length_of_validation_dataset % BATCH_SIZE > 0:
+        validation_steps += 1
+
+    ### END CODE HERE
+
+    ### YOUR CODE HERE ####
+
+    # Define the Keras TensorBoard callback.
+    logdir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+
+    # Fit the model, setting the parameters noted in the instructions above.
+    history = model.fit(
+        x=training_dataset,
+        # y=None,
+        # batch_size=None,
+        epochs=EPOCHS,
+        # epochs=1,
+        # verbose='auto',
+        callbacks=[tensorboard_callback],
+        # validation_split=0.0,
+        validation_data=validation_dataset,
+        # shuffle=True,
+        # class_weight=None,
+        # sample_weight=None,
+        # initial_epoch=0,
+        steps_per_epoch=steps_per_epoch,
+        validation_steps=validation_steps,
+        # validation_batch_size=None,
+        # validation_freq=1
+    )
+
+    ### END CODE HERE ###
+
+
+def intersection_over_union(pred_box, true_box):
+
+    xmin_pred, ymin_pred, xmax_pred, ymax_pred = np.split(pred_box, 4, axis=1)
+    xmin_true, ymin_true, xmax_true, ymax_true = np.split(true_box, 4, axis=1)
+
+    # Calculate coordinates of overlap area between boxes
+    xmin_overlap = np.maximum(xmin_pred, xmin_true)
+    xmax_overlap = np.minimum(xmax_pred, xmax_true)
+    ymin_overlap = np.maximum(ymin_pred, ymin_true)
+    ymax_overlap = np.minimum(ymax_pred, ymax_true)
+
+    # Calculates area of true and predicted boxes
+    pred_box_area = (xmax_pred - xmin_pred) * (ymax_pred - ymin_pred)
+    true_box_area = (xmax_true - xmin_true) * (ymax_true - ymin_true)
+
+    # Calculates overlap area and union area.
+    overlap_area = np.maximum((xmax_overlap - xmin_overlap), 0) * np.maximum(
+        (ymax_overlap - ymin_overlap), 0
+    )
+    union_area = (pred_box_area + true_box_area) - overlap_area
+
+    # Defines a smoothing factor to prevent division by 0
+    smoothing_factor = 1e-10
+
+    # Updates iou score
+    iou = (overlap_area + smoothing_factor) / (union_area + smoothing_factor)
+
+    return iou
+
+
+def predict():
+    print("Start Predicting...")
+
+    # Load the model you saved earlier
+    file_id = '1kUjC7aiBz1CWtohpL7xbF3igA72t8Dez'
+    url = f'https://docs.google.com/uc?id={file_id}'
+    print(f'Downloading {url}')
+    model_name = 'class_model.h5'
+    # gdown.download(url, model_name)
+
+    model = tf.keras.models.load_model(model_name, compile=False)
+
+    data_dir = "./data"
+    visualization_validation_dataset = get_visualization_validation_dataset(data_dir)
+
+    # Makes predictions
+    # original_images, normalized_images, normalized_bboxes = dataset_to_numpy_with_original_bboxes_util(visualization_validation_dataset, N=500)
+    original_images, normalized_images, normalized_bboxes = (
+        dataset_to_numpy_with_original_bboxes_util(
+            visualization_validation_dataset, N=500
+        )
+    )
+    predicted_bboxes = model.predict(normalized_images.astype("float32"))
+
+    # Calculates IOU and reports true positives and false positives based on IOU threshold
+    iou = intersection_over_union(predicted_bboxes, normalized_bboxes)
+    iou_threshold = 0.5
+
+    print(
+        "Number of predictions where iou > threshold(%s): %s"
+        % (iou_threshold, (iou >= iou_threshold).sum())
+    )
+    print(
+        "Number of predictions where iou < threshold(%s): %s"
+        % (iou_threshold, (iou < iou_threshold).sum())
+    )
+    
+    # plot_metrics("loss", "Bounding Box Loss", ylim=0.2)
+
+    """
+    7. Visualize Predications
+    """
+    n = 10
+    indexes = np.random.choice(len(predicted_bboxes), size=n)
+
+    iou_to_draw = iou[indexes]
+    norm_to_draw = original_images[indexes]
+    # display_digits_with_boxes(original_images[indexes], predicted_bboxes[indexes], normalized_bboxes[indexes], iou[indexes], "True and Predicted values", bboxes_normalized=True)
+    display_digits_with_boxes(
+        original_images[indexes],
+        predicted_bboxes[indexes],
+        normalized_bboxes[indexes],
+        iou[indexes],
+        "True and Predicted values",
+        bboxes_normalized=True,
+    )
+    
