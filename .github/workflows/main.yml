@@ -27,9 +27,9 @@ jobs:
           fetch-depth: 0
       - name: Add remote
         env:
-          HG: ${{ secrets.HG }}
+          HG: ${{ secrets.HF_TOKEN }}
         run: git remote add space https://randyjhc:$HG@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes
       - name: Push to hub
         env:
-          HG: ${{ secrets.HG }}
+          HG: ${{ secrets.HF_TOKEN }}
         run: git push --force https://randyjhc:$HG@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes main
