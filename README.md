@@ -1,3 +1,15 @@
+---
+title: Predicting Bounding Boxes
+emoji: 🐠
+colorFrom: gray
+colorTo: purple
+sdk: gradio
+sdk_version: 4.39.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # Predicting-Bounding-Boxes
 
 This is the week 1 programming assignment for the Advanced Computer Vision course.
