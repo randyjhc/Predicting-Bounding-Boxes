@@ -3,6 +3,26 @@
 import gradio as gr
 import random
 from lib.predict import predict
+# ---
+import numpy as np
+import matplotlib.pyplot as plt
+from io import BytesIO
+from PIL import Image
+
+def generate_image():
+    # Generate a random image using matplotlib
+    fig, ax = plt.subplots()
+    ax.imshow(np.random.rand(512, 512, 3))
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    plt.close(fig)
+    
+    # Convert to PIL Image
+    img = Image.open(buf)
+    
+    return [img]
+# ---
 
 def fake_gan():
     images = [
@@ -20,13 +40,22 @@ def fake_gan():
     return images
 
 with gr.Blocks() as demo:
+    gr.Markdown("Upload your image or select a image below and then click **Predict** to see the output.")
     gallery = gr.Gallery(
-        label="Generated images", show_label=False, elem_id="gallery"
-    , columns=[3], rows=[1], object_fit="contain", height="auto")
+        label="Chosen images",
+        show_label=False,
+        elem_id="gallery",
+        columns=[3],
+        rows=[1],
+        object_fit="contain",
+        height="auto",
+        interactive=True
+    )            
+    
     btn = gr.Button("Generate images", scale=0)
 
-    btn.click(fake_gan, None, gallery)
-
+    # btn.click(fake_gan, None, gallery)
+    btn.click(predict, None, gallery)
 
 if __name__ == "__main__":
     demo.launch()

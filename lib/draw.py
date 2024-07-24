@@ -2,7 +2,8 @@ import os, re, time, json, zipfile
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-
+from io import BytesIO
+from PIL import Image
 
 def draw_bounding_box_on_image(
     image, ymin, xmin, ymax, xmax, color=(255, 0, 0), thickness=5
@@ -155,6 +156,17 @@ def display_digits_with_boxes(
                 color=color,
                 transform=ax.transAxes,
             )
+        
+        # A patch for displaying with gradio
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.close(fig)
+        
+        # Convert to PIL Image
+        img = Image.open(buf)
+        
+        return [img]
 
 
 # utility to display training and validation curves

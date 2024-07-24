@@ -360,7 +360,7 @@ def predict():
     iou_to_draw = iou[indexes]
     norm_to_draw = original_images[indexes]
     # display_digits_with_boxes(original_images[indexes], predicted_bboxes[indexes], normalized_bboxes[indexes], iou[indexes], "True and Predicted values", bboxes_normalized=True)
-    display_digits_with_boxes(
+    return display_digits_with_boxes(
         original_images[indexes],
         predicted_bboxes[indexes],
         normalized_bboxes[indexes],
