@@ -1,6 +1,7 @@
 import os, re, time, json, zipfile, wget
 
-# import PIL.Image, PIL.ImageFont, PIL.ImageDraw
+
+import PIL.Image, PIL.ImageFont, PIL.ImageDraw
 import numpy as np
 import tensorflow as tf
 
@@ -18,6 +19,7 @@ from datetime import datetime
 from lib.draw import *
 from lib.final_model import *
 import gdown
+import wget
 
 BATCH_SIZE = 64
 
@@ -311,20 +313,54 @@ def intersection_over_union(pred_box, true_box):
 
     return iou
 
+def preview():
+    print("Start Previewing...")
+    # Specify the data directory
+    data_dir = "./data"
+    # Create the data directory
+    try:
+        os.mkdir(data_dir)
+    except FileExistsError:
+        print(f"{data_dir} already exists")
 
-def predict():
-    print("Start Predicting...")
+    # Load the dataset
+    ds_name = 'caltech_birds2010_011.zip'
+    if not os.path.isfile(ds_name):
+        url = "https://storage.googleapis.com/tensorflow-3-public/datasets/caltech_birds2010_011.zip"
+        wget.download(url)
+        # Extract the dataset into the data directory
+        with zipfile.ZipFile("./caltech_birds2010_011.zip") as zipref:
+            zipref.extractall(data_dir)
+    
+    # Random choose 10 images for preview
+    visualization_validation_dataset = get_visualization_validation_dataset(data_dir)
+    original_images, normalized_images, normalized_bboxes = (
+        dataset_to_numpy_with_original_bboxes_util(
+            visualization_validation_dataset, N=500
+        )
+    )
+    indexes = np.random.choice(len(original_images), size=10)
+    # print(list(zip(original_images[indexes], normalized_bboxes[indexes])))
+    # return original_images[indexes]
+    images = [(original_images[i], " ".join(map(str, normalized_bboxes[i]))) for i in indexes]
+    return images
 
-    # Load the model you saved earlier
-    file_id = '1kUjC7aiBz1CWtohpL7xbF3igA72t8Dez'
-    url = f'https://docs.google.com/uc?id={file_id}'
-    print(f'Downloading {url}')
+def predict(selected_images):
+    print(f"Start Predicting...")
+    
+    data_dir = "./data"
+
+    # Load the model
     model_name = 'class_model.h5'
-    # gdown.download(url, model_name)
-
+    if not os.path.isfile(model_name):
+        file_id = '1kUjC7aiBz1CWtohpL7xbF3igA72t8Dez'
+        # url = f'https://docs.google.com/uc?id={file_id}'
+        url = f'https://docs.google.com/uc?export=download&id={file_id}'
+        print(f'Downloading {url}')
+        wget.download(url, out=model_name)
+        
     model = tf.keras.models.load_model(model_name, compile=False)
 
-    data_dir = "./data"
     visualization_validation_dataset = get_visualization_validation_dataset(data_dir)
 
     # Makes predictions
@@ -359,7 +395,7 @@ def predict():
 
     iou_to_draw = iou[indexes]
     norm_to_draw = original_images[indexes]
-    # display_digits_with_boxes(original_images[indexes], predicted_bboxes[indexes], normalized_bboxes[indexes], iou[indexes], "True and Predicted values", bboxes_normalized=True)
+    
     return display_digits_with_boxes(
         original_images[indexes],
         predicted_bboxes[indexes],
@@ -369,3 +405,56 @@ def predict():
         bboxes_normalized=True,
     )
     
+
+def predict_v2(selected_images):
+    print(f"Start Predicting...")
+    # print(f"[predict_v2] type(selected_images) = {type(selected_images)}")
+    # print(f"[predict_v2] selected_images = {selected_images}")
+    if not selected_images:
+        return
+    # Load the model
+    model_name = 'class_model.h5'
+    if not os.path.isfile(model_name):
+        file_id = '1kUjC7aiBz1CWtohpL7xbF3igA72t8Dez'
+        # url = f'https://docs.google.com/uc?id={file_id}'
+        url = f'https://docs.google.com/uc?export=download&id={file_id}'
+        print(f'Downloading {url}')
+        wget.download(url, out=model_name)
+        
+    model = tf.keras.models.load_model(model_name, compile=False)
+    
+    ds_original_images, ds_normalized_images, ds_normalized_bboxes = [], [], []
+    for org_img, org_bbox in selected_images:
+        org_img, nor_img, _ = read_image_with_shape(org_img, np.zeros(4,))
+        ds_original_images.append(org_img)
+        ds_normalized_images.append(nor_img)
+        if not org_bbox:
+            ds_normalized_bboxes.append([0., 0., 0., 0.])
+        else:
+            ds_normalized_bboxes.append(list(map(float, org_bbox.split())))
+    if len(selected_images) < 2:
+        original_images = np.array(ds_original_images)
+    else:
+        original_images = np.array(ds_original_images, dtype="object")
+    normalized_images = np.array(ds_normalized_images, dtype="object")
+    normalized_bboxes = np.array(ds_normalized_bboxes, dtype="object")
+    print(f'[predict_v2] ds_original_images = {type(ds_original_images)}')
+    print(f'[predict_v2] original_images = {type(original_images)}')
+
+    predicted_bboxes = model.predict(normalized_images.astype("float32"))
+
+    iou = intersection_over_union(predicted_bboxes, normalized_bboxes)
+
+    print(f'[predict_v2] shape of original_images = {original_images.shape}')
+    print(f'[predict_v2] shape of normalized_images = {normalized_images.shape}')
+    print(f'[predict_v2] shape of normalized_bboxes = {normalized_bboxes.shape}')
+    print(f'[predict_v2] shape of iou = {iou.shape}')
+
+    return display_digits_with_boxes(
+        original_images,
+        predicted_bboxes,
+        normalized_bboxes,
+        iou,
+        "True and Predicted values",
+        bboxes_normalized=True,
+    )

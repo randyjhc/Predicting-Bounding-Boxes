@@ -106,13 +106,18 @@ def display_digits_with_boxes(
 
     n = len(images)
 
-    fig = plt.figure(figsize=(20, 4))
-    plt.title(title)
-    plt.yticks([])
-    plt.xticks([])
+    # fig = plt.figure(figsize=(20, 4))
+    # plt.title(title)
+    # plt.yticks([])
+    # plt.xticks([])
+
+    img = []
 
     for i in range(n):
-        ax = fig.add_subplot(1, 10, i + 1)
+        
+        fig = plt.figure(figsize=(4, 4))
+        ax = fig.add_subplot(1, 1, 1)
+        # ax = fig.add_subplot(1, 10, i + 1)
         bboxes_to_plot = []
         if len(pred_bboxes) > i:
             bbox = pred_bboxes[i]
@@ -145,28 +150,28 @@ def display_digits_with_boxes(
 
         plt.imshow(img_to_draw)
 
-        if len(iou) > i:
-            color = "black"
-            if iou[i][0] < iou_threshold:
-                color = "red"
-            ax.text(
-                0.2,
-                -0.3,
-                "iou: %s" % (np.round(iou[i][0], 2)),
-                color=color,
-                transform=ax.transAxes,
-            )
+        # if len(iou) > i:
+        #     color = "black"
+        #     if iou[i][0] < iou_threshold:
+        #         color = "red"
+        #     ax.text(
+        #         0.2,
+        #         -0.3,
+        #         "iou: %s" % (np.round(iou[i][0], 2)),
+        #         color=color,
+        #         transform=ax.transAxes,
+        #     )
         
         # A patch for displaying with gradio
         buf = BytesIO()
-        plt.savefig(buf, format='png')
+        plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0)
         buf.seek(0)
         plt.close(fig)
         
         # Convert to PIL Image
-        img = Image.open(buf)
+        img.append((Image.open(buf), f'iou = {str(np.round(iou[i][0], 2))}'))
         
-        return [img]
+    return img
 
 
 # utility to display training and validation curves

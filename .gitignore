@@ -161,7 +161,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# *.zip
+# Cutomized ignore
 *.zip
 *.h5
 data/
+.DS_Store

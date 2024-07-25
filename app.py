@@ -1,61 +1,65 @@
 #!/usr/bin/env python
-# %%
 import gradio as gr
 import random
-from lib.predict import predict
+from lib.predict import predict, predict_v2, preview
 # ---
-import numpy as np
-import matplotlib.pyplot as plt
-from io import BytesIO
-from PIL import Image
+# import numpy as np
+# import matplotlib.pyplot as plt
+# from io import BytesIO
+# from PIL import Image
 
-def generate_image():
-    # Generate a random image using matplotlib
-    fig, ax = plt.subplots()
-    ax.imshow(np.random.rand(512, 512, 3))
-    buf = BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    plt.close(fig)
+# def generate_image():
+#     # Generate a random image using matplotlib
+#     fig, ax = plt.subplots()
+#     ax.imshow(np.random.rand(512, 512, 3))
+#     buf = BytesIO()
+#     plt.savefig(buf, format='png')
+#     buf.seek(0)
+#     plt.close(fig)
     
-    # Convert to PIL Image
-    img = Image.open(buf)
+#     # Convert to PIL Image
+#     img = Image.open(buf)
     
-    return [img]
+#     return [img]
 # ---
 
-def fake_gan():
-    images = [
-        (random.choice(
-            [
-                "http://www.marketingtool.online/en/face-generator/img/faces/avatar-1151ce9f4b2043de0d2e3b7826127998.jpg",
-                "http://www.marketingtool.online/en/face-generator/img/faces/avatar-116b5e92936b766b7fdfc242649337f7.jpg",
-                "http://www.marketingtool.online/en/face-generator/img/faces/avatar-1163530ca19b5cebe1b002b8ec67b6fc.jpg",
-                "http://www.marketingtool.online/en/face-generator/img/faces/avatar-1116395d6e6a6581eef8b8038f4c8e55.jpg",
-                "http://www.marketingtool.online/en/face-generator/img/faces/avatar-11319be65db395d0e8e6855d18ddcef0.jpg",
-            ]
-        ), f"label {i}")
-        for i in range(3)
-    ]
-    return images
+def got_inputs(gallery_in):
+    return gr.Button.update(interactive=True)
 
 with gr.Blocks() as demo:
-    gr.Markdown("Upload your image or select a image below and then click **Predict** to see the output.")
-    gallery = gr.Gallery(
+    gr.Markdown("# Bird Detector with Bounding Boxes")
+    gr.Markdown("Upload your image or use generated images and then click **Predict** to see the output.")
+    
+    btn_gen_img = gr.Button("Generate images", scale=0, min_width=200)
+    
+    gallery_in = gr.Gallery(
         label="Chosen images",
         show_label=False,
-        elem_id="gallery",
-        columns=[3],
-        rows=[1],
+        elem_id="gallery_in",
+        columns=[5],
+        rows=[2],
         object_fit="contain",
         height="auto",
-        interactive=True
-    )            
-    
-    btn = gr.Button("Generate images", scale=0)
+        interactive=True,
+        type="numpy",
+        # value=preview()
+    )
 
-    # btn.click(fake_gan, None, gallery)
-    btn.click(predict, None, gallery)
+    btn_predict = gr.Button("Predict", scale=0, min_width=200)
+
+    gallery_out = gr.Gallery(
+        label="Predicted images",
+        show_label=False,
+        elem_id="gallery_out",
+        columns=[5],
+        rows=[2],
+        object_fit="contain",
+        height="auto",
+        type="numpy",
+    )
+    # event listeners
+    btn_gen_img.click(preview, None, gallery_in)
+    btn_predict.click(predict_v2, gallery_in, gallery_out)
 
 if __name__ == "__main__":
     demo.launch()
