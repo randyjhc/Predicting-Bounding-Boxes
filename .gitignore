@@ -166,3 +166,4 @@ cython_debug/
 *.h5
 data/
 .DS_Store
+*.gif
