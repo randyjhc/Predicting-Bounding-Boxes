@@ -12,11 +12,17 @@ license: mit
 
 # Predicting-Bounding-Boxes
 
-This is the week 1 programming assignment for the Advanced Computer Vision course.
+The prediction results are shown in the GIF below. You can also take a look at the [website](https://huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes).
 
-In this assignment, we'll be building a model to predict bounding boxes around images.
+![demo-gif](./results/demo.gif)
 
-We will use transfer learning on one of the pre-trained models available in Keras. We'll be using the [Caltech Birds - 2010 dataset](https://www.vision.caltech.edu/datasets/).
+This project is modified from the week 1 programming assignment for the Advanced Computer Vision course.
+
+In this assignment, we have built a model to predict bounding boxes around images.
+
+We performed transfer learning on one of the pre-trained models available in Keras and used the [Caltech Birds - 2010 dataset](https://www.vision.caltech.edu/datasets/).
+
+Then the model is deployed to Hugging Face using gradio.
 
 # Model Graph
 
