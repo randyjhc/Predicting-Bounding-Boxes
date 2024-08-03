@@ -32,4 +32,4 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://randyjhc:$HF_TOKEN@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes main
+        run: git push --no-verify --force https://randyjhc:$HF_TOKEN@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes main
