@@ -34,5 +34,5 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-            git lfs track "results/*.gif"
-            git push --no-verify --force https://randyjhc:$HF_TOKEN@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes main
+            git filter-branch --force --index-filter "git rm --cached --ignore-unmatch results/demo.gif" --prune-empty --tag-name-filter cat -- --all 
+            git push --force space main
