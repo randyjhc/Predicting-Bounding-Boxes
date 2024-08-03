@@ -33,5 +33,6 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run:
+        run: |
+            git filter-branch --force --index-filter "git rm --cached --ignore-unmatch results/demo.gif" --prune-empty --tag-name-filter cat -- --all 
             git push --force space main
