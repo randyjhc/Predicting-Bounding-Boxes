@@ -30,8 +30,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: git remote add space https://randyjhc:$HF_TOKEN@huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes
-      #- name: LFS Failure History Cleanup
-      #  run: git filter-branch --force --index-filter "git rm --cached --ignore-unmatch results/demo.gif" --prune-empty --tag-name-filter cat -- --all
+      - name: LFS Failure History Cleanup
+       run: git filter-branch --force --index-filter "git rm --cached --ignore-unmatch results/demo.gif" --prune-empty --tag-name-filter cat -- --all
       - name: LFS Install
         run: git lfs install
       - name: LFS Track
