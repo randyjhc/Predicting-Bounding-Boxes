@@ -34,7 +34,6 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git filter-branch --force --index-filter "git rm --cached --ignore-unmatch results/demo.gif" --prune-empty --tag-name-filter cat -- --all 
           git lfs track "results/*.gif"
           git lfs checkout
           git push --force space main
