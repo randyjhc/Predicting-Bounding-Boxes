@@ -10,6 +10,8 @@ pinned: false
 license: mit
 ---
 
+[![CI/CD](https://github.com/randyjhc/Predicting-Bounding-Boxes/actions/workflows/main.yml/badge.svg)](https://github.com/randyjhc/Predicting-Bounding-Boxes/actions/workflows/main.yml)
+
 # Predicting-Bounding-Boxes
 
 The prediction results are shown in the GIF below. You can also take a look at the [website](https://huggingface.co/spaces/randyjhc/Predicting-Bounding-Boxes).
