@@ -427,7 +427,8 @@ def predict_v2(selected_images):
     #     wget.download(url, out=model_name)
     
     # Download the model file from the Hugging Face Model Hub
-    model_path = hf_hub_download(repo_id="randyjhc/demo_model", filename=model_name)
+    hf_token = os.environ.get("HF_TOKEN")
+    model_path = hf_hub_download(repo_id="randyjhc/demo_model", filename=model_name, token=hf_token)
 
     model = tf.keras.models.load_model(model_path, compile=False)
     
