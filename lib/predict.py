@@ -21,6 +21,9 @@ from lib.final_model import *
 import gdown
 import wget
 
+from huggingface_hub import hf_hub_download
+
+
 BATCH_SIZE = 64
 
 
@@ -414,13 +417,18 @@ def predict_v2(selected_images):
         return
     # Load the model
     model_name = 'class_model.h5'
-    if not os.path.isfile(model_name):
-        file_id = '1kUjC7aiBz1CWtohpL7xbF3igA72t8Dez'
-        # url = f'https://docs.google.com/uc?id={file_id}'
-        url = f'https://docs.google.com/uc?export=download&id={file_id}'
-        print(f'Downloading {url}')
-        wget.download(url, out=model_name)
-        
+
+    # Download the model file from google drive
+    # if not os.path.isfile(model_name):
+    #     file_id = '1kUjC7aiBz1CWtohpL7xbF3igA72t8Dez'
+    #     # url = f'https://docs.google.com/uc?id={file_id}'
+    #     url = f'https://docs.google.com/uc?export=download&id={file_id}'
+    #     print(f'Downloading {url}')
+    #     wget.download(url, out=model_name)
+    
+    # Download the model file from the Hugging Face Model Hub
+    model_path = hf_hub_download(repo_id="randyjhc/demo_model", filename=model_name)
+
     model = tf.keras.models.load_model(model_name, compile=False)
     
     ds_original_images, ds_normalized_images, ds_normalized_bboxes = [], [], []

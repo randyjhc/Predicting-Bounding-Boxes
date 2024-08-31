@@ -8,3 +8,4 @@ black
 opencv-python-headless
 wget
 gdown
+huggingface_hub
