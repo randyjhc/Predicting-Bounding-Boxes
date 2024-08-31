@@ -429,7 +429,7 @@ def predict_v2(selected_images):
     # Download the model file from the Hugging Face Model Hub
     model_path = hf_hub_download(repo_id="randyjhc/demo_model", filename=model_name)
 
-    model = tf.keras.models.load_model(model_name, compile=False)
+    model = tf.keras.models.load_model(model_path, compile=False)
     
     ds_original_images, ds_normalized_images, ds_normalized_bboxes = [], [], []
     for org_img, org_bbox in selected_images:
